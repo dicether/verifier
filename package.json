@@ -1,0 +1,24 @@
+{
+  "name": "@dicether/verifier",
+  "version": "1.0.0",
+  "description": "Dicether verifier",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify -t brfs index.js -o bundle.js"
+  },
+  "author": "dicether",
+  "license": "MIT",
+  "dependencies": {
+    "@dicether/state-channel": "^1.0.0-alpha.5",
+    "axios": "^0.18.0",
+    "bn.js": "^4.11.8",
+    "eth-sig-util": "^1.4.2",
+    "ethereumjs-util": "^5.2.0",
+    "web3": "^1.0.0-beta.34"
+  },
+  "devDependencies": {
+    "brfs": "^1.6.1",
+    "browserify": "^16.2.0"
+  }
+}
