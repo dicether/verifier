@@ -8,12 +8,14 @@ const stateChannel = require("@dicether/state-channel");
 const CONTRACT_ADDRESS2 = "0xbF8B9092e809DE87932B28ffaa00D520b04359aA";
 const CONTRACT_ADDRESS3 = "0x3e07881993c7542a6Da9025550B54331474b21dd";
 const CONTRACT_ADDRESS4 = "0xEB6F4eC38A347110941E86e691c2ca03e271dF3b";
+const CONTRACT_ADDRESS5 = "0x9919D97e50397b7483E9EA61e027E4C4419c8171";
 
 // address of the house game session signer
 const SERVER_ADDRESS = "0xCef260a5Fed7A896BBE07b933B3A5c17aEC094D8";
 
 const NEW_EIP_GAME_ID = 572;
 const OLD_EIP_GAME_ID = 638;
+const NEW_EIP_2_GAME_ID = 1759;
 
 // we are on the main chain => chain id 1
 const CHAIN_ID = 1;
@@ -33,15 +35,17 @@ function getContractAddress(gameId) {
         return CONTRACT_ADDRESS2;
     } else if (gameId < 638) {
         return CONTRACT_ADDRESS3;
-    } else {
+    } else if (gameId < 1759) {
         return CONTRACT_ADDRESS4;
+    } else {
+        return CONTRACT_ADDRESS5;
     }
 }
 
 
 // return the signature version for the given game id.
 function getSignatureVersion(gameId) {
-    return gameId < NEW_EIP_GAME_ID || gameId >= OLD_EIP_GAME_ID ? 1 : 2;
+    return gameId < NEW_EIP_GAME_ID || (gameId >= OLD_EIP_GAME_ID && gameId < NEW_EIP_2_GAME_ID) ? 1 : 2;
 }
 
 
