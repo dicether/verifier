@@ -103,6 +103,11 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
         throw Error("Invalid number of bets! Expected: " + bets.length + " Got: " + numBets);
     }
 
+    if (roundId === 0) {
+        // no bets were placed => nothing to check
+        return true;
+    }
+
     // reverse so first placed bet is bets[0]
     bets = bets.reverse();
 
