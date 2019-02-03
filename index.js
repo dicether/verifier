@@ -191,7 +191,7 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
     }
 
     // check if final balance is valid
-    if (balance !== prevBalance) {
+    if (regularEnded && balance !== prevBalance) {
         throw Error("Invalid game session balance " + prevBalance + " instead of " + balance);
     }
 
