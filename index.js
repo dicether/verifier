@@ -4,17 +4,10 @@ const Web3 = require("web3");
 const stateChannel = require("@dicether/state-channel");
 
 // addresses of our different contracts
-const CONTRACT_ADDRESS2 = "0xbF8B9092e809DE87932B28ffaa00D520b04359aA";
-const CONTRACT_ADDRESS3 = "0x3e07881993c7542a6Da9025550B54331474b21dd";
-const CONTRACT_ADDRESS4 = "0xEB6F4eC38A347110941E86e691c2ca03e271dF3b";
-const CONTRACT_ADDRESS5 = "0x9919D97e50397b7483E9EA61e027E4C4419c8171";
+const CONTRACT_ADDRESS = "0xaEc1F783B29Aab2727d7C374Aa55483fe299feFa";
 
 // address of the house game session signer
 const SERVER_ADDRESS = "0xCef260a5Fed7A896BBE07b933B3A5c17aEC094D8";
-
-const NEW_EIP_GAME_ID = 572;
-const OLD_EIP_GAME_ID = 638;
-const NEW_EIP_2_GAME_ID = 1759;
 
 // we are on the main chain => chain id 1
 const CHAIN_ID = 1;
@@ -24,29 +17,6 @@ axios.defaults.baseURL = "https://api.dicether.com/api";
 
 // our contract abi
 const GameChannelAbi = JSON.parse(fs.readFileSync(__dirname + "/GameChannelContract.json", "utf8"));
-
-
-// returns the contract address for the given game id.
-function getContractAddress(gameId) {
-    if (gameId < 256) {
-        throw new Error("Verification not supported for games below game id 256!");
-    } else if (gameId < 572) {
-        return CONTRACT_ADDRESS2;
-    } else if (gameId < 638) {
-        return CONTRACT_ADDRESS3;
-    } else if (gameId < 1759) {
-        return CONTRACT_ADDRESS4;
-    } else {
-        return CONTRACT_ADDRESS5;
-    }
-}
-
-
-// return the signature version for the given game id.
-function getSignatureVersion(gameId) {
-    return gameId < NEW_EIP_GAME_ID || (gameId >= OLD_EIP_GAME_ID && gameId < NEW_EIP_2_GAME_ID) ? 1 : 2;
-}
-
 
 // loads game date information from the smart contract.
 function getGameData(web3, contract, gameId) {
@@ -95,7 +65,6 @@ function getGameData(web3, contract, gameId) {
 // we can verify if the balance after the bet is correct.
 // we can verify if the final payout is correct.
 function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, regularEnded) {
-    const version = getSignatureVersion(gameId);
     const numBets = roundId - (regularEnded ? 1 : 0);
 
     if (bets.length !== numBets) {
@@ -128,7 +97,6 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
     for (let i = 0; i < bets.length; i++) {
         const bet = bets[i];
 
-        const contractAddress = bet.contractAddress;
         const userAddress = bet.user.address;
 
         const signedBetData = {
@@ -143,11 +111,11 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
         };
 
         // First check if player and server signatures are valid
-        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, contractAddress, bet.serverSig, SERVER_ADDRESS, version)) {
+        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, CONTRACT_ADDRESS, bet.serverSig, SERVER_ADDRESS)) {
             throw Error("Invalid server signature for bet with roundId: " + bet.roundId);
         }
 
-        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, contractAddress, bet.userSig, userAddress, version)) {
+        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, CONTRACT_ADDRESS, bet.userSig, userAddress)) {
             throw Error("Invalid player signature for bet with roundId: " + bet.roundId);
         }
 
@@ -208,7 +176,7 @@ function verifyGameSession(gameId) {
 
     // initialize web3 and the contract
     const web3 = new Web3(window.web3.currentProvider);
-    const contract = new web3.eth.Contract(GameChannelAbi, getContractAddress(gameId));
+    const contract = new web3.eth.Contract(GameChannelAbi, CONTRACT_ADDRESS);
 
     // verify bets for the given game id
     return web3.eth.net.getId().then(function(network) {
