@@ -144,7 +144,7 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
         serverPrevHash = bet.serverHash;
 
         // check if result number is valid
-        const resultNumShouldBe = stateChannel.calcResultNumber(bet.gameType, bet.serverSeed, bet.userSeed);
+        const resultNumShouldBe = stateChannel.calcResultNumber(bet.gameType, bet.serverSeed, bet.userSeed, bet.num);
         if (bet.resultNum !== resultNumShouldBe) {
             throw Error("Invalid number " + bet.resultNum + " instead of" + resultNumShouldBe);
         }

@@ -10,15 +10,15 @@
   "author": "dicether",
   "license": "MIT",
   "dependencies": {
-    "@dicether/state-channel": "^1.0.0-alpha.9",
-    "axios": "^0.18.0",
-    "bn.js": "^4.11.8",
-    "eth-sig-util": "^1.4.2",
-    "ethereumjs-util": "^5.2.0",
-    "web3": "^1.0.0-beta.34"
+    "@dicether/state-channel": "^1.0.0",
+    "axios": "^0.21.1",
+    "bn.js": "^5.2.0",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.0.10",
+    "web3": "^1.3.6"
   },
   "devDependencies": {
-    "brfs": "^1.6.1",
-    "browserify": "^16.2.0"
+    "brfs": "^2.0.2",
+    "browserify": "^17.0.0"
   }
 }
