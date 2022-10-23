@@ -5,10 +5,17 @@ const Web3 = require("web3");
 const stateChannel = require("@dicether/state-channel");
 
 // addresses of our different contracts
-const CONTRACT_ADDRESS = "0xaEc1F783B29Aab2727d7C374Aa55483fe299feFa";
+const CONTRACT_ADDRESS_OLD = "0xaEc1F783B29Aab2727d7C374Aa55483fe299feFa";
 
 // address of the house game session signer
-const SERVER_ADDRESS = "0xCef260a5Fed7A896BBE07b933B3A5c17aEC094D8";
+const SERVER_ADDRESS_OLD = "0xCef260a5Fed7A896BBE07b933B3A5c17aEC094D8";
+
+const CONTRACT_ADDRESS = "0xa867bF8447eC6f614EA996057e3D769b76a8aa0e";
+
+// address of the house game session signer
+const SERVER_ADDRESS = "0x437EC7503dFF1b5F5Ab4Dab4455C45a270629f4d";
+
+const GAME_ID_CONTRACT_CHANGED = 5246;
 
 // we are on the main chain => chain id 1
 const CHAIN_ID = 1;
@@ -65,7 +72,7 @@ function getGameData(web3, contract, gameId) {
 // we can verify if the bet result is correct.
 // we can verify if the balance after the bet is correct.
 // we can verify if the final payout is correct.
-function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, regularEnded) {
+function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, regularEnded, contractAddress, serverAddress) {
     const numBets = roundId - (regularEnded ? 1 : 0);
 
     if (bets.length !== numBets) {
@@ -112,11 +119,11 @@ function verifyBets(gameId, bets, roundId, balance, serverEndHash, userEndHash, 
         };
 
         // First check if player and server signatures are valid
-        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, CONTRACT_ADDRESS, bet.serverSig, SERVER_ADDRESS)) {
+        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, contractAddress, bet.serverSig, serverAddress)) {
             throw Error("Invalid server signature for bet with roundId: " + bet.roundId);
         }
 
-        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, CONTRACT_ADDRESS, bet.userSig, userAddress)) {
+        if (!stateChannel.verifySignature(signedBetData, CHAIN_ID, contractAddress, bet.userSig, userAddress)) {
             throw Error("Invalid player signature for bet with roundId: " + bet.roundId);
         }
 
@@ -175,9 +182,22 @@ function verifyGameSession(gameId) {
         throw Error("You need a web3 enabled browser!");
     }
 
+    let serverAddress;
+    let contractAddress;
+    if (gameId >= GAME_ID_CONTRACT_CHANGED)
+    {
+        contractAddress = CONTRACT_ADDRESS;
+        serverAddress = SERVER_ADDRESS;
+    }
+    else
+    {
+        contractAddress = CONTRACT_ADDRESS_OLD;
+        serverAddress = SERVER_ADDRESS_OLD;
+    }
+
     // initialize web3 and the contract
     const web3 = new Web3(window.web3.currentProvider);
-    const contract = new web3.eth.Contract(GameChannelAbi, CONTRACT_ADDRESS);
+    const contract = new web3.eth.Contract(GameChannelAbi, contractAddress);
 
     // verify bets for the given game id
     return web3.eth.net.getId().then(function(network) {
@@ -191,7 +211,16 @@ function verifyGameSession(gameId) {
         const gameData = getGameData(web3, contract, gameId);
         return Promise.all([bets, gameData]);
     }).then(function([bets, gameData]) {
-        if (!verifyBets(gameId, bets, gameData.roundId, gameData.balance, gameData.serverEndHash, gameData.userEndHash, gameData.regularEnded)) {
+        if (!verifyBets(
+                gameId,
+                bets,
+                gameData.roundId,
+                gameData.balance,
+                gameData.serverEndHash,
+                gameData.userEndHash,
+                gameData.regularEnded,
+                contractAddress,
+                serverAddress)) {
             alert("Bet Validation failed!");
         } else {
             alert("All " + bets.length + " bets for game session " + gameId + " are valid!");
